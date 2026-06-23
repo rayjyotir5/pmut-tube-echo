@@ -70,6 +70,20 @@ because the source paper's own transmit and receive sensitivities disagree by mo
 $100\times$; the relative structure, the cliff, and the receiver-limited regime are robust.
 \end{abstract}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{../figures/fig_hero.png}
+\caption{The central phenomenon. A 100\,kHz acoustic pulse launched by the PMUT at the
+cylinder end cap travels the 3\,m oil column (launch, top), spreads and fills the bore
+(mid-transit, middle), reflects off the steel piston face, and returns to the transducer about
+4.2\,ms later (echo returns, bottom), where its time of flight gives the piston position. Red
+and blue are positive and negative pressure; grey is steel. Frames are from the two-dimensional
+FDTD simulation of Section~\ref{sec:fdtd}. At 200\,kHz and above the pulse is absorbed before it
+can complete the round trip (Figure~\ref{fig:montage}); that frequency dependence is the main
+result of this paper.}
+\label{fig:hero}
+\end{figure}
+
 \section{Introduction}
 The position of the piston inside a hydraulic cylinder, together with the pressure of the
 oil that drives it, fixes the instantaneous position and force state of the actuator, which
@@ -94,7 +108,7 @@ PMUT's transmit pressure, receive charge, and quality factor to its geometry thr
 nearly invariant mode-shape factors. That model is validated for radiation into air over
 distances below 0.5\,m and contains no treatment of layered solid/liquid channels, of
 propagation to metres, of pulse-echo, or of noise. It therefore cannot, by itself, answer
-the ranging question.
+the ranging question. Figure~\ref{fig:hero} shows the phenomenon at the heart of the study: the pulse making its round trip down the bore.
 
 I extend it into an end-to-end link model and report three findings. (1) The operating
 frequency is set by a steep absorption cliff: because the oil attenuation coefficient grows

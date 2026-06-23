@@ -85,8 +85,42 @@ def wave_montage():
     fig.savefig(p, dpi=140, bbox_inches="tight"); print("saved", p)
 
 
+
+
+# ----------------------------------------------------------------------------
+def hero():
+    """Opening teaser: the 100 kHz pulse launches at the end cap, travels 3 m down
+    the oil column, reflects off the piston face, and returns (FDTD field)."""
+    import imageio.v2 as imageio
+    sim_dt = 4.70
+    stages = [(0.30, "launch"), (1.55, "mid-transit"), (4.32, "echo returns")]
+    path = os.path.join(PMUT_DIR, "100khz.mp4")
+    rd = imageio.get_reader(path); frames = [f for f in rd]; n = len(frames)
+    fig, axes = plt.subplots(len(stages), 1, figsize=(11, 4.3))
+    for ax, (tt, lab) in zip(axes, stages):
+        fr = frames[min(n - 1, int(tt / sim_dt * n))]
+        h, w = fr.shape[:2]
+        # crop just the wave-field (drop panel title above and x-axis below)
+        crop = fr[int(0.135 * h):int(0.385 * h), int(0.085 * w):int(0.995 * w)]
+        ax.imshow(crop); ax.set_xticks([]); ax.set_yticks([])
+        ax.set_ylabel(f"{lab}\n(t={tt:.1f} ms)", fontsize=9, rotation=0,
+                      ha="right", va="center", labelpad=28)
+        for sp in ax.spines.values():
+            sp.set_visible(False)
+    fig.suptitle("A 100 kHz pulse launched at the end cap travels the 3 m oil column, "
+                 "reflects off the piston face, and returns",
+                 fontsize=11, y=0.99)
+    fig.tight_layout(rect=[0.02, 0, 1, 0.95])
+    p = os.path.join(OUT, "fig_hero.png")
+    fig.savefig(p, dpi=150, bbox_inches="tight"); print("saved", p)
+
+
 if __name__ == "__main__":
     schematic()
+    try:
+        hero()
+    except Exception as e:
+        print("hero skipped:", e)
     try:
         wave_montage()
     except Exception as e:
