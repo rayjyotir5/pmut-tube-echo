@@ -138,6 +138,38 @@ $f$ (kHz) & oil loss (dB, RT) & echo & noise floor & SNR (dB) & $V_{\mathrm{echo
 model is passive after the reciprocity fix; before the fix it reached 14 at 75 kHz.}
 \end{table}
 
+\section{Ranging precision (Monte-Carlo)}\label{app:precision}
+The estimator (\texttt{src/ranging\_precision.py}) synthesizes the modeled echo (a Hann-windowed
+$\sim$10-cycle tone burst of amplitude $V_{\mathrm{echo}}$ at the operating frequency) plus modeled
+receiver noise of rms $V_{\mathrm{noise}}$, and estimates the carrier phase over the known burst
+window with the maximum-likelihood single-bin estimator $\hat\varphi=\angle\sum_n r_n\,w_n e^{-j2\pi f t_n}$
+($w_n$ the envelope). The circular standard deviation of $\hat\varphi$ over $2\times10^4$ noise
+realizations gives $\sigma_\varphi$, converted to a one-way distance error by
+Eq.~\eqref{eq:crlb}. Coherent integration over the burst gives the matched-filter result a
+processing gain over the single-look bound computed from the narrowband link SNR, so the
+Monte-Carlo $\sigma_d$ is smaller than the conservative CRLB figure.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{rrrrr}
+\toprule
+$f$ (kHz) & SNR (dB) & $\lambda_{\mathrm{oil}}$ (mm) & $\sigma_d$ CRLB (mm) & $\sigma_d$ MC (mm) \\
+\midrule
+75  & $+45.5$ & 19.2 & 0.006 & 0.001 \\
+100 & $+33.4$ & 14.4 & 0.017 & 0.003 \\
+135 & $+13.7$ & 10.7 & 0.124 & 0.020 \\
+200 & $-33.2$ & 7.2  & \multicolumn{2}{c}{below 12 dB detection: no echo to time} \\
+250 & $-79.3$ & 5.8  & \multicolumn{2}{c}{below 12 dB detection: no echo to time} \\
+\bottomrule
+\end{tabular}
+\caption{Single-reflector ranging precision. At the detectable low frequencies the one-way
+distance error is far below the 3\,mm ($0.1\%$ of 3\,m) target. At 200\,kHz and above the echo
+is undetectable, so phase ranging does not apply; the phase ``spread'' there is the uniform
+wrap of an uninformative estimate, not a usable precision. Classical axial resolution at
+135\,kHz, by contrast, is $c/(2B)\approx 29$\,cm with $B=f_0/Q$, but that is the
+two-reflector-separation figure, not the single-echo ranging precision.}
+\end{table}
+
 \section{Calibration inconsistency}\label{app:calib}
 The source paper reports three sensitivity figures that do not agree when cross-checked. Its
 charge-sensitivity formula (Eq.~\eqref{eq:chargesens}) evaluates to about 1130 fC/Pa for the configured stack, while
@@ -160,6 +192,7 @@ cd pmut-tube-echo/src
 python3 pmut_echo_sim.py 100 135 200   # -> ../figures/pmut_tube_results.png + reports
 python3 pmut_wave2d.py 100             # -> 100khz.mp4/.gif  (also 135, 200)
 python3 make_paper_figures.py          # -> schematic + wave montage
+python3 ranging_precision.py           # -> ranging-precision sigma_d(f) table
 cd ../paper
 pdflatex main && bibtex main && pdflatex main && pdflatex main
 \end{verbatim}

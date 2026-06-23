@@ -46,8 +46,8 @@
 \begin{abstract}
 Piezoelectric micromachined ultrasonic transducers (PMUTs) are usually designed for
 short-range imaging in soft tissue near 1\,MHz. I ask a different question: can a PMUT
-range a target by pulse-echo down a 3\,m oil-filled steel tube, and what actually limits
-it? Starting from the published system-level transducer model of Dangi and Pratap (2017),
+range the piston face of a hydraulic cylinder by pulse-echo down a 3\,m oil-filled steel
+bore, and what actually limits it? Starting from the published system-level transducer model of Dangi and Pratap (2017),
 which radiates into air over sub-half-metre distances and carries no noise model, I add
 the missing pieces: an acoustic-channel model for the tube treated as a waveguide
 (transfer-matrix wall coupling, confinement instead of spherical spreading, frequency
@@ -71,22 +71,30 @@ $100\times$; the relative structure, the cliff, and the receiver-limited regime 
 \end{abstract}
 
 \section{Introduction}
-Ultrasonic ranging through metal walls and along fluid-filled tubes is attractive for
-level sensing, leak and blockage detection, and through-wall telemetry in sealed vessels.
-Piezoelectric micromachined ultrasonic transducers (PMUTs) are small, low-power, and
-CMOS-compatible, which makes them appealing for such embedded sensing~\citep{jung2017,przybyla2011}. Almost all PMUT
-design practice, however, targets short-range medical and fingerprint imaging, where the
-operating frequency is pushed toward 1\,MHz and above to improve axial resolution, and
-where the propagation medium is soft tissue or water over millimetres to a few centimetres.
+The position of the piston inside a hydraulic cylinder, together with the pressure of the
+oil that drives it, fixes the instantaneous position and force state of the actuator, which
+is what closed-loop motion control, condition monitoring, and safety interlocks need.
+Measuring both from a single device at the cylinder end cap, without breaching the bore or
+adding an external rod-mounted scale, would be valuable. This work asks whether a
+piezoelectric micromachined ultrasonic transducer (PMUT) integrated into the end cap can do
+it by pulse-echo: ranging the steel piston face along the oil-filled bore to recover
+position, while the same acoustic path and the pressure dependence of the oil properties
+inform the force estimate. PMUTs are small, low-power, and
+CMOS-compatible~\citep{jung2017,przybyla2011}, which suits embedding in an end cap. Almost
+all PMUT design practice, however, targets short-range medical and fingerprint imaging, where
+the operating frequency is pushed toward 1\,MHz and above for axial resolution and the medium
+is soft tissue or water over millimetres to a few centimetres.
 
-The question that motivates this work is whether that design point transfers to a very
-different regime: a transducer at one end of a 3\,m oil-filled steel tube, attempting to
-detect the echo from the far end. The starting point is the system-level analytical model
-of \citet{dangi2017}, which compactly relates a multilayer PMUT's transmit
-pressure, receive charge, and quality factor to its geometry through three nearly invariant
-mode-shape factors. That model is validated for radiation into air over distances below
-0.5\,m and contains no treatment of layered solid/liquid channels, of propagation to metres,
-of pulse-echo, or of noise. It therefore cannot, by itself, answer the ranging question.
+The cylinder is a very different regime: a transducer at one end of an oil-filled steel bore
+up to 3\,m long, ranging the piston face. I model the bore as a 3\,m tube (outer diameter
+300\,mm, wall 10\,mm) with the piston represented by a thick-steel specular reflector at the
+far end, the worst case of full extension. The starting point for the transducer is the
+system-level analytical model of \citet{dangi2017}, which compactly relates a multilayer
+PMUT's transmit pressure, receive charge, and quality factor to its geometry through three
+nearly invariant mode-shape factors. That model is validated for radiation into air over
+distances below 0.5\,m and contains no treatment of layered solid/liquid channels, of
+propagation to metres, of pulse-echo, or of noise. It therefore cannot, by itself, answer
+the ranging question.
 
 I extend it into an end-to-end link model and report three findings. (1) The operating
 frequency is set by a steep absorption cliff: because the oil attenuation coefficient grows
@@ -105,7 +113,7 @@ caveat: the source paper's published transmit and receive sensitivities are mutu
 inconsistent by more than two orders of magnitude, so absolute signal-to-noise ratios (SNRs)
 are uncertain to within roughly that factor. The robust outputs are the relative trends,
 the $f^2$ cliff, the passivity constraint, and the receiver-limited regime, all of which are
-independent of the absolute calibration.
+independent of the absolute calibration. I also show that the low-frequency band the cliff forces is where single-reflector carrier-phase ranging meets the application's sub-3\,mm (0.1\,\% of 3\,m) precision target.
 
 \section{The source transducer model}\label{sec:source}
 A PMUT is a clamped circular multilayer plate with a piezoelectric layer (here lead
@@ -275,12 +283,13 @@ the result in Section~\ref{sec:cliff}. A small additional waveguide wall-bounce 
 $P_{\mathrm{inc}}=\sqrt{2 Z_{\mathrm{steel}} I_{\mathrm{back}}}$.
 
 \subsection{Reciprocity-consistent transmit and receive}\label{sec:transducer}
-The error that is easy to make, and that I initially made, is to anchor the transmit and
-receive paths independently: transmit from an assumed launched power, receive from the
-published charge sensitivity. Doing so lets the end-to-end voltage transfer exceed unity at
-low frequency (in my first runs, a 140\,V echo from a 10\,V drive), which is impossible for a
-passive two-way link. The fix is to require both directions to come from one
-electromechanical coupling. In the lumped model the transmit volume-velocity response and the
+A passive, reciprocal transducer cannot present a two-way (transmit then receive) voltage
+transfer greater than unity. Anchoring the two paths independently, transmit from an assumed
+launched power and receive from the charge-sensitivity formula of Eq.~\eqref{eq:chargesens},
+does not respect this: it gives an end-to-end transfer above unity at low frequency (a
+140\,V echo from a 10\,V drive), which is unphysical. The correct construction makes both
+paths follow from a single electromechanical coupling, so the receive sensitivity is fixed by
+the transmit response rather than chosen independently. In the lumped model the transmit volume-velocity response and the
 receive charge sensitivity share the transformer ratio $\phi$ and the mechanical impedance
 $Z_m$, which forces the reciprocity relation
 \begin{equation}
@@ -398,6 +407,43 @@ specular reflector or a small scatterer. The tube removes that term: the wave is
 end reflects nearly all of it, and the geometric penalty reduces to the aperture fill fraction.
 This is why a sealed oil-filled tube is a far more forgiving channel than open water, and why the
 feasibility question turns on absorption and electronics rather than on spreading.
+
+\section{From detection to ranging precision}\label{sec:precision}
+The application needs the piston position to about $0.1\%$ of the 3\,m stroke, roughly 3\,mm.
+Low frequency appears to forfeit this. The classical axial resolution, about $c/(2B)$ with the
+resonant bandwidth $B\approx f_0/Q\approx 2.45$\,kHz at 135\,kHz, is near 29\,cm. But axial
+resolution measures the ability to separate two closely spaced reflectors, which is not the
+task here.
+
+The piston face is a single strong specular reflector ($\Gamma\approx0.99$) at a slowly
+varying range. The relevant figure is the precision of the time-of-flight estimate to that one
+echo, bounded below by the Cram\'er--Rao limit, which tightens with SNR and is not capped by
+the pulse-envelope width; carrier-phase (I/Q) estimation reaches sub-wavelength precision at
+high SNR. For the round-trip phase $\varphi = 4\pi f d/c$ of a one-way distance $d$, the
+distance error is
+\begin{equation}
+\delta d \approx \frac{c}{4\pi f}\,\sigma_\varphi, \qquad \sigma_\varphi \approx \frac{1}{\sqrt{2\,\mathrm{SNR}}} ,
+\label{eq:crlb}
+\end{equation}
+the second relation being the high-SNR phase bound. With the calibrated SNRs this conservative
+bound is $\sigma_d\approx 0.017$\,mm at 100\,kHz and $0.12$\,mm at 135\,kHz. A matched-filter
+Monte-Carlo on the modeled echo plus modeled receiver noise (Appendix~\ref{app:precision}),
+which integrates the $\sim$10-cycle burst coherently and so does at least as well, gives
+$\sigma_d\approx 3\,\mu$m and $20\,\mu$m respectively. Both sit well inside the 3\,mm target.
+The high $Q=55$ helps rather than hurts, because the long coherent ring-down supplies many
+cycles over which to average phase. At 200\,kHz and above the echo is below the 12\,dB
+detection threshold, so there is no echo to time and ranging does not apply: the same $f^2$
+cliff that forbids high frequency also defines the low band where phase ranging is precise.
+
+Two practical points qualify this. The carrier phase wraps every half wavelength (about 5\,mm
+one-way here), so an integer-cycle ambiguity must be resolved, by a coarse envelope or
+leading-edge estimate, or by tracking the slowly moving piston between pings. And absolute
+accuracy needs the oil sound speed $c(T,P)$ known to well under $0.1\%$, which a temperature
+sensor with a one-time calibration of the fixed electronic and wall-transit delays provides;
+phase methods are relatively insensitive to absolute amplitude calibration. Matched filtering
+against the channel-propagated template approaches the bound, and since receiver noise sets
+$\sigma_\varphi$, the receiver improvements that aid detection (lower $e_n$, lower $C_s$)
+tighten precision in the same proportion.
 
 \section{Limitations and failure modes}
 The dominant limitation is absolute calibration. The source paper's transmit deflection

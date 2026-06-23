@@ -34,19 +34,19 @@ def schematic():
     # near-end cap + PMUT
     ax.add_patch(Rectangle((-0.04, -Rout), 0.04, 2 * Rout, fc="#9a9a9f", ec="k", lw=0.5))
     ax.add_patch(Rectangle((-0.10, -0.05), 0.06, 0.10, fc="#ffb24d", ec="k", lw=0.6))
-    ax.text(-0.07, 0.12, "PMUT\narray", ha="center", fontsize=8)
+    ax.text(-0.07, 0.13, "PMUT at\nend cap", ha="center", fontsize=8)
     # outgoing / returning arrows
     ax.add_patch(FancyArrow(0.15, 0.055, 2.4, 0, width=0.004, head_width=0.02,
                             head_length=0.12, fc="C3", ec="C3", length_includes_head=True))
     ax.text(1.3, 0.085, "transmit (volume velocity)", color="C3", fontsize=8)
     ax.add_patch(FancyArrow(2.55, -0.055, -2.4, 0, width=0.004, head_width=0.02,
                             head_length=0.12, fc="C0", ec="C0", length_includes_head=True))
-    ax.text(1.3, -0.10, "echo (incident pressure)", color="C0", fontsize=8)
+    ax.text(1.3, -0.10, "echo from piston face (incident pressure)", color="C0", fontsize=8)
     # annotations
     ax.annotate("", xy=(0, -Rout - 0.03), xytext=(L, -Rout - 0.03),
                 arrowprops=dict(arrowstyle="<->", color="k"))
-    ax.text(L / 2, -Rout - 0.075, "L = 3 m oil column", ha="center", fontsize=9)
-    ax.text(L + 0.09, 0, "thick\nsteel\n(reflector)", ha="center", va="center", fontsize=7.5)
+    ax.text(L / 2, -Rout - 0.075, "oil column: piston distance (up to ~3 m)", ha="center", fontsize=9)
+    ax.text(L + 0.09, 0, "piston\nface", ha="center", va="center", fontsize=8, color="white")
     ax.annotate("OD 300 mm", xy=(0.02, Rout), xytext=(0.35, Rout + 0.05),
                 fontsize=8, arrowprops=dict(arrowstyle="->", lw=0.6))
     ax.text(0.02, -Rout + wall + 0.004, " 10 mm wall", fontsize=7, va="bottom")
