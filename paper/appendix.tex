@@ -140,7 +140,7 @@ model is passive after the reciprocity fix; before the fix it reached 14 at 75 k
 
 \section{Calibration inconsistency}\label{app:calib}
 The source paper reports three sensitivity figures that do not agree when cross-checked. Its
-Eq.~17 receive charge sensitivity evaluates to about 1130 fC/Pa for the configured stack, while
+charge-sensitivity formula (Eq.~\eqref{eq:chargesens}) evaluates to about 1130 fC/Pa for the configured stack, while
 the value implied by its measured 3 nm/V transmit deflection through the reciprocity relation is
 about 27 fC/Pa, a factor of 41. Separately, its design-map deflection sensitivity (Table 3,
 $\sim$0.42 $\mu$m/V) and its measured deflection (Fig.~9, 3 nm/V) differ by more than $100\times$.
@@ -151,8 +151,12 @@ self-consistent choice within this spread, 250 kHz and above fail and the usable
 frequency.
 
 \section{Reproducibility}\label{app:repro}
+All code, the rendered wave-propagation videos, the figures, and this paper are released at
+\url{https://github.com/rayjyotir5/pmut-tube-echo}. The repository README mirrors the steps
+below; after cloning, the commands reproduce every figure and movie.
 \begin{verbatim}
-cd src
+git clone https://github.com/rayjyotir5/pmut-tube-echo
+cd pmut-tube-echo/src
 python3 pmut_echo_sim.py 100 135 200   # -> ../figures/pmut_tube_results.png + reports
 python3 pmut_wave2d.py 100             # -> 100khz.mp4/.gif  (also 135, 200)
 python3 make_paper_figures.py          # -> schematic + wave montage

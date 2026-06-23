@@ -107,19 +107,118 @@ are uncertain to within roughly that factor. The robust outputs are the relative
 the $f^2$ cliff, the passivity constraint, and the receiver-limited regime, all of which are
 independent of the absolute calibration.
 
-\section{Background: the starting transducer model}
+\section{The source transducer model}\label{sec:source}
 A PMUT is a clamped circular multilayer plate with a piezoelectric layer (here lead
-zirconate titanate, PZT) between electrodes on a passive structural layer. Applying a
-voltage produces an unbalanced in-plane stress and hence a bending moment, so the plate
-vibrates flexurally and pumps the adjacent fluid; conversely an incident pressure flexes the
-plate and generates charge. \citet{dangi2017}, building on the natural-frequency derivation of \citet{sammaoura2012}, reduce this to a lumped
-electro-mechano-acoustic circuit and obtain closed forms for the first-mode natural
-frequency, the receive charge sensitivity (their Eq.~17), the transmit response, and the
-quality factor, all written through three mode-shape participation factors
-$\Lambda', \Lambda_1, \Lambda_2$ that vary little across designs. I reuse those relations
-for the transducer and treat everything outside the device, the channel and the receiver
-electronics, as the part to be built. Section~\ref{sec:transducer} returns to a subtlety in
-how the transmit and receive sides of that model must be coupled.
+zirconate titanate, PZT) between electrodes on a passive structural layer. Applying a voltage
+produces an unbalanced in-plane stress and hence a bending moment, so the plate vibrates
+flexurally and pumps the adjacent fluid; conversely an incident pressure flexes the plate and
+generates charge. \citet{dangi2017}, building on the clamped-plate analysis of
+\citet{sammaoura2012}, reduce this to a system-level electro-mechano-acoustic model. I restate
+that model here, faithfully but compactly, so the present work is self-contained and so later
+equations refer to this paper's own numbering rather than to equation numbers in the source.
+
+\paragraph{Assumptions.} The source model rests on (i) classical (Kirchhoff) thin-plate theory
+for a clamped circular plate carrying an in-plane pre-tension; (ii) a top electrode treated as
+covering the whole suspended plate, valid when the electrode is thin compared with the stack, so
+the multilayer behaves as one equivalent plate; and (iii) neglect of the initial curvature that
+arises from non-uniform radial residual stress, so the only forcing is the piezoelectric bending
+moment and the deflection is measured relative to the static equilibrium at the operating
+residual tension. I adopt these same assumptions.
+
+\paragraph{Structural response.} The clamped plate with pre-tension obeys
+\begin{equation}
+D_e \nabla^4 w - T_e \nabla^2 w + \rho_h\,\frac{\partial^2 w}{\partial t^2} = f(r,\theta,t),
+\label{eq:eom}
+\end{equation}
+with mass per area $\rho_h=\sum_i \rho_i h_i$, net in-plane tension $T_e=\sum_i \sigma_i h_i$, and
+equivalent flexural rigidity
+\begin{equation}
+D_e = \sum_i \frac{E_i}{1-\nu_i^2}\left(\frac{h_i^3}{12} + z_i^2 h_i\right),
+\label{eq:De}
+\end{equation}
+summed over layers $i$ of Young's modulus $E_i$, Poisson ratio $\nu_i$, thickness $h_i$, and
+mid-plane offset $z_i$ from the neutral plane. The non-dimensional ratio of tension to rigidity,
+\begin{equation}
+\kappa^2 = T_e\,a^2 / D_e \qquad (a=\text{plate radius}),
+\label{eq:kappa}
+\end{equation}
+sets whether the device behaves as a plate ($\kappa^2 \ll \alpha_{00}^2$) or a tensioned membrane
+($\kappa^2 \gg \alpha_{00}^2$). The clamped eigenproblem gives the first natural frequency
+\begin{equation}
+\omega_{00} = \alpha_{00}\beta_{00}\sqrt{\frac{D_e}{\rho_h a^4}}
+            = \sqrt{\frac{\alpha_{00}^2 D_e}{\rho_h a^4}\,(\alpha_{00}^2+\kappa^2)},
+\qquad \beta_{00}^2=\alpha_{00}^2+\kappa^2,
+\label{eq:wn}
+\end{equation}
+where $\alpha_{00}$ is the first clamped eigenvalue, which the source finds runs only from $3.19$
+(plate) to $2.14$ (membrane). The two limits are
+$\omega_{00}\approx(\alpha_{00}^2/a^2)\sqrt{D_e/\rho_h}$ (plate, scaling as $1/a^2$) and
+$\omega_{00}\approx(\alpha_{00}/a)\sqrt{T_e/\rho_h}$ (membrane, scaling as $1/a$).
+
+\paragraph{Mode-shape factors.} With the normalized first mode $\psi_{00}(r)$, three
+participation factors carry the geometry into the lumped model,
+\begin{equation}
+\Lambda' = r_p\!\left.\frac{\partial \psi_{00}}{\partial r}\right|_{r=r_p},\quad
+\Lambda_1 = \int_0^a \frac{2\psi_{00}\,r}{a^2}\,dr,\quad
+\Lambda_2 = \int_0^a \frac{2\psi_{00}^2\,r}{a^2}\,dr,
+\label{eq:shape}
+\end{equation}
+representing the piezoelectric-moment, uniform-pressure, and inertial participations, with $r_p$
+the top-electrode radius. The source's central structural finding is that these are nearly
+invariant over six decades of $\kappa^2$ ($\Lambda'\!\approx\!0.99\text{--}1.24$,
+$\Lambda_1\!\approx\!0.33\text{--}0.42$, $\Lambda_2\!\approx\!0.20\text{--}0.26$), so they may be
+treated as constants; I use the plate-regime values.
+
+\paragraph{Forced response.} The piezoelectric drive is a moment load per unit voltage
+$M_p = e_{31,f}\,z_p$, with $e_{31,f}$ the effective transverse piezoelectric coefficient and
+$z_p$ the PZT mid-plane offset from the neutral plane. Near the first resonance the centre
+deflection per unit drive voltage and per unit incident pressure are
+\begin{equation}
+\frac{w_0}{V_{\mathrm{in}}} = \frac{2 M_p}{\rho_h a^2 \omega_{00}^2}\,\frac{\Lambda'}{\Lambda_2}\,\mathcal{D}(\gamma),
+\qquad
+\frac{w_0}{P_{\mathrm{in}}} = \frac{1}{\rho_h \omega_{00}^2}\,\frac{\Lambda_1}{\Lambda_2}\,\mathcal{D}(\gamma),
+\label{eq:defl}
+\end{equation}
+with $\gamma=\omega/\omega_{00}$ and the second-order resonance factor
+$\mathcal{D}(\gamma)=[(1-\gamma^2)^2+(2\zeta\gamma)^2]^{-1/2}$ ($\zeta$ the damping ratio).
+
+\paragraph{Lumped circuit and transfer functions.} The device maps to an electrical port
+(clamped capacitance $C_s$) coupled through a transformer of ratio $\phi$ to a mechano-acoustic
+branch (compliance $C_m$, mass $L_m$, loss $R_m$) loaded by the piston radiation impedance
+$D_{ac}$. The coupling and branch elements are
+\begin{equation}
+\phi = \frac{2 e_{31,f} z_p}{a^2}\,\frac{\Lambda'}{\Lambda_1},\quad
+C_m = \frac{\pi a^2}{\rho_h \omega_{00}^2}\,\frac{\Lambda_1^2}{\Lambda_2},\quad
+L_m = \frac{\rho_h}{\pi a^2}\,\frac{\Lambda_2}{\Lambda_1^2},
+\label{eq:lumped}
+\end{equation}
+with $\omega_{00}^2 = 1/(L_m C_m)$ and the resonant mechanical impedance
+$Z_m = R_m + \mathrm{Re}(D_{ac}) = \omega_{00} L_m / Q$ set by the quality factor $Q$. The transmit
+volume velocity and the receive charge sensitivity follow from the \emph{same} $\phi$ and $Z_m$,
+\begin{equation}
+\frac{\dot q}{V_{\mathrm{in}}} = \frac{\phi}{Z_m},
+\qquad
+\left|\frac{Q_{rx}}{P_{\mathrm{in}}}\right|
+= \frac{2\pi Q}{\omega_{00}^2}\,\frac{e_{31,f} z_p}{\rho_h}\,\frac{\Lambda'\Lambda_1}{\Lambda_2},
+\label{eq:chargesens}
+\end{equation}
+and the radiated far-field pressure is
+$P_{\mathrm{tx}} = j\rho_{ac}\omega\,\dot q\,/(2\pi R)\,H(\Theta)\,e^{-\alpha R}$, with $H(\Theta)$
+the piston directivity. Equation~\eqref{eq:chargesens} is the receive charge sensitivity that the
+present work later re-derives by reciprocity (Section~\ref{sec:transducer}).
+
+\paragraph{Source results and validation.} The source reports that, for a fixed layer stack, the
+transmitted pressure is nearly independent of device size and tension; the receive sensitivity
+scales as $1/\omega_{00}^2$; plate-regime deflection scales as $a^2$ and membrane deflection as
+$a^0$; and the optimal electrode ratio $r_p/a$ runs from about $0.65$ (plate) to $0.95$
+(membrane). It validates against fabricated plate-type ($10\,\mu$m Si, $\kappa^2\!\approx\!0$) and
+membrane-type ($300$\,nm SiO$_2$, $T_e\!\approx\!130$\,N/m, $\kappa^2\!\approx\!1000$) PMUTs, with
+measured first-mode resonances matching the model and a measured plate-type deflection sensitivity
+of about $3$\,nm/V at $126$\,kHz for a $1$\,mm device, which I use later as the calibration anchor.
+Crucially for the present work, this model is validated only for radiation into \emph{air} over
+sub-half-metre distances and contains no layered solid/liquid channel, no propagation to metres, no
+pulse-echo, and no noise. Equations~\eqref{eq:eom}--\eqref{eq:chargesens} are what I reuse for the
+transducer; everything outside the device is built in Section~\ref{sec:model}.
 
 \section{System model}\label{sec:model}
 Figure~\ref{fig:schematic} shows the geometry. A PMUT (or, more realistically, a small
@@ -192,14 +291,13 @@ $Z_m$, which forces the reciprocity relation
 where $\dot q$ is the volume velocity, $\omega_{00}$ the resonance, and $Q/P_{\mathrm{in}}$ the
 charge per unit incident pressure. I anchor the absolute scale to the paper's \emph{measured}
 transmit (a 1\,mm, 126\,kHz device deflects about 3\,nm/V at resonance, their Fig.~9) and
-\emph{derive} the receive sensitivity from Eq.~\eqref{eq:reciprocity}, rather than using their
-Eq.~17 in isolation. The aperture is treated as an array of elements each sized to resonate at
+\emph{derive} the receive sensitivity from Eq.~\eqref{eq:reciprocity}, rather than using the charge-sensitivity formula of Eq.~\eqref{eq:chargesens} in isolation. The aperture is treated as an array of elements each sized to resonate at
 the operating frequency; the element count cancels in the SNR, so the result is aperture
 self-consistent. With this construction the implied transmit is physically sane
 (\Wtx{} launched, face velocity \faceVel, face pressure \Pface), and the two-way transfer never
 exceeds $V_{\mathrm{echo}}/V_{\mathrm{in}}=\gainMax$ across the band, restoring passivity. The
 reciprocity-derived receive sensitivity at 250\,kHz is \sqRecip\,fC/Pa, about $41\times$ smaller
-than the paper's Eq.~17 value of \sqEq\,fC/Pa; the two published numbers are not mutually
+than the value \sqEq\,fC/Pa from the charge-sensitivity formula Eq.~\eqref{eq:chargesens}; the two numbers are not mutually
 consistent, which is the origin of the calibration caveat stated throughout.
 
 \subsection{Receiver noise}\label{sec:noise}
@@ -277,7 +375,7 @@ boundary.
 \caption{FDTD acoustic field on an axial slice. Top: at 100\,kHz the pulse travels the full
 3\,m, reflects, and returns (echo present near the near end at 4.30\,ms). Bottom: at 200\,kHz the
 pulse is absorbed before completing the round trip, so no echo returns. The contrast is the
-$f^2$ absorption cliff made visible.}
+$f^2$ absorption cliff made visible. The full three-panel movies for each frequency are released at \url{https://github.com/rayjyotir5/pmut-tube-echo/tree/main/media} (files \texttt{100khz.mp4}, \texttt{135khz.mp4}, \texttt{200khz.mp4}).}
 \label{fig:montage}
 \end{figure}
 
@@ -303,7 +401,7 @@ feasibility question turns on absorption and electronics rather than on spreadin
 
 \section{Limitations and failure modes}
 The dominant limitation is absolute calibration. The source paper's transmit deflection
-sensitivity, its Eq.~17 receive sensitivity, and its tabulated design-map sensitivities
+sensitivity, its receive sensitivity from Eq.~\eqref{eq:chargesens}, and its tabulated design-map sensitivities
 disagree by more than $100\times$ when cross-checked, so any absolute SNR inherits roughly that
 uncertainty. I therefore present the absolute numbers as indicative and rest the conclusions on
 the relative structure, which is calibration independent: the $f^2$ cliff, the passivity
