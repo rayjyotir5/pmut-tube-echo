@@ -1,0 +1,174 @@
+% ===================== APPENDIX =====================
+\section{Provenance: human input versus AI effort}\label{app:provenance}
+This work was produced in a single interactive session in which a human supplied the
+starting paper, the physical scenario, a small set of physical parameters, and steering and
+quality feedback, while an AI agent (Claude, Anthropic, Opus 4.8) performed all reading,
+derivation, coding, debugging, figure generation, and writing. I log this explicitly so the
+division of labor is preserved.
+
+\subsection{Verbatim human prompts}
+Light typographic errors are preserved as written.
+\begin{enumerate}\itemsep1pt
+\item ``read the modelling.pdf and understand what it is doing, will specify the actual problem after that''
+\item ``Has analytical model shown acoustic transmission through 10 mm steel + synthetic mineral oil yields detectable echo at 3 m with SNR $\geq$ 12 dB at 1 MHz centre frequency? if not i want to set up a simulation and visualize the results'' (clarifying choices: pulse-echo through wall; sweep noise; 1D analytical + transfer matrix)
+\item ``lets now upgrade the sim to a 2d environment, a steel tube is 3m long, 10mm thick and since it is the cross section of a circular tube, the outer dia of the tube is 300mm. the pmut is positioned at one end and the other end forms the reflecting surface (this end may have increased thickness of steel so as to ignore steel-air interface). tube is filled with oil. now run the simulation and repeat previous sweeps. feel free to re-center the frequency sweep and not assume 1MHz is a fixed input so that SNR is optimal. i'd also like to see a video or gif animation, use the WaveSimulator2D approach if required.''
+\item ``oil attenuation is 20 db/m and waveguide wall-bounce loss of 0.5db/m is fine. in the mp4, please render two more panels below the wave propagation animation. one is the pmut transmitter signal over time and a vertical line moves along synced to wave animation. similarly a panel for measured pmut receiver signal. also have a legend to show physical time of sim progress. hope the wave is simulated with noise considered at 250khz''
+\item ``erm 20db/m was not at 1mhz, it is at 250khz''
+\item ``render a second clip at the $\sim$50-100 kHz optimum so you can see a clean, surviving echo for contrast''
+\item ``is the sharp drop at 1MHz in the SNR vs frequency correct? why is this happening? would it help to now stop the sweep and model the noise correctly?''
+\item ``yes'' (proceed to tie transmit and receive to one reciprocity-consistent coupling)
+\item ``lets now regenerate the results plots and wave propagation animations with the new calibrated model and view it above and below 135kHz''
+\item ``make sure to regenerate pmut\_tube\_results.png''
+\item ``i dont want three png files, i want a single one''
+\item ``the plots are at 250khz, pls update to 100, 135, 200''
+\item ``plot y axes are not scaled correctly, getting cropped''
+\item ``panel 1 and 4 as well, will log scale help?''
+\item ``i dont like the bar chart in panel 4, id rather see the waveform, not normalized to noise''
+\item ``treat this entire session as the research done, document everything and produce the resultant paper''
+\end{enumerate}
+
+\subsection{Session flow}
+Turn 1 established what the source model does. Turn 2 established that it does not address the
+ranging question and produced a first free-field link budget (two self-found bugs fixed:
+double-counted spreading, and an unphysical multi-watt transmit). Turn 3 reformulated the
+channel as a tube waveguide and added the 2D FDTD (a sign-error instability was found and
+fixed). Turns 4 to 6 set parameters, built the synchronized three-panel animation, corrected
+the attenuation reference frequency (a 112 dB change at the operating point), and rendered a
+low-frequency contrast clip. Turn 7 diagnosed the SNR cliff as the $f^2$ absorption law and
+replaced the assumed noise floor with a modeled one. Turn 8 tied transmit and receive together
+by reciprocity, removing an impossible gain-above-unity artifact. Turns 9 to 15 regenerated all
+outputs with the calibrated model and refined figure quality. Turn 16 produced this paper.
+
+\section{Full parameter set}\label{app:params}
+All values are documented in the released configuration (\texttt{src/pmut\_echo\_sim.py}).
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lll}
+\toprule
+Group & Quantity & Value \\
+\midrule
+Geometry & tube length $L$ & 3.0 m \\
+         & outer diameter / wall & 300 mm / 10 mm \\
+         & inner oil radius $R_{\mathrm{in}}$ & 140 mm \\
+         & effective aperture radius $a_{\mathrm{ap}}$ & 5 mm \\
+Steel    & density / speed & 7850 kg/m$^3$ / 5900 m/s \\
+         & impedance & 46.3 MRayl \\
+Oil      & density / speed & 850 kg/m$^3$ / 1440 m/s \\
+         & impedance & 1.22 MRayl \\
+         & absorption $\alpha_0$ at 250 kHz & 20 dB/m, $\propto f^2$ \\
+         & waveguide wall-bounce loss & 0.5 dB/m \\
+         & far-end reflection $\Gamma$ & 0.99 \\
+Transducer & quality factor $Q$ & 55 \\
+         & $\Lambda', \Lambda_1, \Lambda_2$ & 0.99, 0.33, 0.20 \\
+         & $e_{31,f}$ & $-24.24$ C/m$^2$ \\
+         & flexural rigidity $D_e$ (calibrated) & $1.0\times10^{-5}$ N\,m \\
+         & plate eigenvalue $\alpha_{00}$ & 3.19 \\
+         & deflection sens. anchor & 3 nm/V at 500 $\mu$m, 126 kHz \\
+Receiver & feedback cap $C_f$ & 10 pF \\
+         & amplifier voltage noise $e_n$ & 4 nV/$\sqrt{\text{Hz}}$ \\
+         & PZT permittivity / thickness & 1000 / 650 nm \\
+         & electrode fill / stray cap & 0.7 / 5 pF \\
+         & dielectric loss $\tan\delta$ & 0.02 \\
+Operating & drive voltage $V_{\mathrm{in}}$ & 10 V \\
+          & detection threshold & 12 dB \\
+\bottomrule
+\end{tabular}
+\caption{Model parameters. Steel speed is reduced to 2500 m/s in the FDTD only (density kept),
+to relax the time step while preserving the impedance contrast.}
+\end{table}
+
+\section{Derivations}\label{app:derivations}
+\paragraph{Wall transfer matrix.} The intensity transmission of a single steel layer of
+impedance $Z$ and thickness $d$ between a source medium $Z_1$ and the oil $Z_2$ is
+\begin{equation}
+\tau_{\mathrm{wall}} = \frac{4 Z_1 Z_2}{(Z_1+Z_2)^2\cos^2(kd) + \big(Z + Z_1 Z_2/Z\big)^2\sin^2(kd)} .
+\end{equation}
+For a transducer well coupled to steel ($Z_1=Z$) this reduces to the bare interface value
+$4 Z_1 Z_2/(Z_1+Z_2)^2 \approx -10$ dB, independent of frequency; for an air-backed transducer
+($Z_1=Z_{\mathrm{air}}$) the $\sin^2$ term creates deep nulls between the half-wave resonances
+at $n\,c_{\mathrm{steel}}/2d$.
+
+\paragraph{Confinement (fill) factor.} In free space the on-axis far-field pressure of a piston
+of radius $a$ falls as $\pi a^2/(\lambda z)$, so the monostatic round trip costs that factor
+squared, about $-41$ dB at $z=3$ m. In the tube the launched power instead fills the
+cross-section and is conserved (apart from absorption); the only geometric loss is the fraction
+the receive aperture re-samples on return, $(a_{\mathrm{ap}}/R_{\mathrm{in}})^2$, which tends to
+unity as the aperture fills the tube.
+
+\paragraph{Reciprocity relation.} In the lumped circuit the transformer (ratio $\phi$) maps the
+electrical port to the mechano-acoustic port with $P=\phi V$ and $I=\phi\dot q$. Transmit gives
+$\dot q = \phi V_{\mathrm{in}}/Z_m$; receive gives $Q = \phi P_{\mathrm{in}}/(j\omega Z_m)$.
+Eliminating $\phi$ and $Z_m$ yields Eq.~\eqref{eq:reciprocity}. Anchoring $\dot q/V$ to the
+measured 3 nm/V deflection and deriving $Q/P_{\mathrm{in}}$ from it makes the two paths share one
+coupling, so the two-way transfer cannot exceed what passivity allows.
+
+\paragraph{Noise.} The output-referred voltage-noise gain of a charge amplifier reading a source
+capacitance $C_s$ is $C_{\mathrm{in}}/C_f$ with $C_{\mathrm{in}}=C_s+C_{\mathrm{stray}}+C_f$.
+The three terms in Eq.~\eqref{eq:noise} are amplifier voltage noise, amplifier current noise
+through the feedback transimpedance $Z_f=1/(\omega C_f)$, and the PZT dielectric-loss Johnson
+noise with parallel conductance $G=\omega C_s\tan\delta$, all integrated over
+$\mathrm{ENBW}=(\pi/2)(f_0/Q)$.
+
+\paragraph{FDTD update.} The variable-density acoustic field uses a staggered velocity-pressure
+leapfrog: $\mathbf{v}\mathrel{-}= (\Delta t/\rho)\nabla p$, then
+$p \mathrel{-}= \Delta t\,\rho c^2\,\nabla\!\cdot\mathbf{v}$, stable for
+$c_{\max}\Delta t/\Delta x \le 1/\sqrt 2$ in 2D. Open boundaries use a graded sponge layer; oil
+absorption is applied as a per-step decay $\exp(-\alpha c\,\Delta t)$ matched to
+Eq.~\eqref{eq:absorption} at the operating frequency. A sign error in the velocity update (using
+$+\nabla p$) made the scheme blow up; correcting it to $-\nabla p$ restored stability.
+
+\section{Additional results}\label{app:results}
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+$f$ (kHz) & oil loss (dB, RT) & echo & noise floor & SNR (dB) & $V_{\mathrm{echo}}/V_{\mathrm{in}}$ \\
+\midrule
+75  & 11  & --       & --      & +46  & 0.168 \\
+100 & 19  & 479 mV   & 10.2 mV & +33.4 & 0.048 \\
+135 & 35  & 57.6 mV  & 11.9 mV & +13.7 & 0.0058 \\
+200 & 77  & 0.316 mV & 14.5 mV & $-33.2$ & $3.2\times10^{-5}$ \\
+250 & 120 & 1.7 $\mu$V & 16.2 mV & $-79$ & $1.8\times10^{-7}$ \\
+1000& 1920 & $\sim$0 & 32 mV   & $-1898$ & $4\times10^{-98}$ \\
+\bottomrule
+\end{tabular}
+\caption{Calibrated link at the design aperture (5 mm) and 3 m range. The detection boundary
+(12 dB) sits near 135 kHz. $V_{\mathrm{echo}}/V_{\mathrm{in}}<1$ at every frequency confirms the
+model is passive after the reciprocity fix; before the fix it reached 14 at 75 kHz.}
+\end{table}
+
+\section{Calibration inconsistency}\label{app:calib}
+The source paper reports three sensitivity figures that do not agree when cross-checked. Its
+Eq.~17 receive charge sensitivity evaluates to about 1130 fC/Pa for the configured stack, while
+the value implied by its measured 3 nm/V transmit deflection through the reciprocity relation is
+about 27 fC/Pa, a factor of 41. Separately, its design-map deflection sensitivity (Table 3,
+$\sim$0.42 $\mu$m/V) and its measured deflection (Fig.~9, 3 nm/V) differ by more than $100\times$.
+I therefore treat absolute SNR as uncertain to roughly two orders of magnitude and rest the
+conclusions on the calibration-independent structure: the $f^2$ cliff, passivity, the
+capacitance-limited noise regime, and the existence of a detection boundary. Under any
+self-consistent choice within this spread, 250 kHz and above fail and the usable band is at low
+frequency.
+
+\section{Reproducibility}\label{app:repro}
+\begin{verbatim}
+cd src
+python3 pmut_echo_sim.py 100 135 200   # -> ../figures/pmut_tube_results.png + reports
+python3 pmut_wave2d.py 100             # -> 100khz.mp4/.gif  (also 135, 200)
+python3 make_paper_figures.py          # -> schematic + wave montage
+cd ../paper
+pdflatex main && bibtex main && pdflatex main && pdflatex main
+\end{verbatim}
+Environment: Python 3.11, NumPy 2.0, SciPy 1.14, Matplotlib 3.10, imageio with the ffmpeg
+plugin; TeX Live 2025. The 1D link budget runs in seconds; each FDTD clip is a few minutes on a
+single CPU core.
+
+\section{AI involvement checklist (summary)}\label{app:checklist}
+Research stage assessment: ideation and framing were human-seeded (the scenario and the ranging
+question) and AI-developed; the literature anchor (one paper) was human-provided; experiment
+design, implementation, analysis, and writing were AI-led with human steering and feedback (High
+AI involvement). AI systems used: Claude (Anthropic), Opus 4.8, as an agent with code execution
+and figure generation. Known limitations and failure modes are stated in the main text
+(Limitations) and Appendix~\ref{app:calib}: absolute calibration uncertainty, a visualization-only
+2D solver, representative rather than measured material properties, and the absence of a physical
+experiment.
